@@ -1,0 +1,6 @@
+# ML-PD — 帕金森代谢组学机器学习实验环境
+numpy>=1.24
+pandas>=2.0
+scikit-learn>=1.3
+xgboost>=1.7
+matplotlib>=3.7
