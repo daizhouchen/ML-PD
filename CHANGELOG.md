@@ -1,5 +1,14 @@
 # Changelog
 
+## Repository organization — 2026-09-26
+
+- Separated current Python code (`src/`), current tutorials (`notebooks/`), research/developer guides (`guides/`), the Pages site (`docs/`) and historical artifacts (`archive/`).
+- Moved and renamed eight historical notebooks without changing their contents; added an old-to-new path index.
+- Added a task-based README, complete run guide, module map and directory entry points. Updated site, Notebook and documentation links.
+- Grouped static assets under `docs/assets/` and marked generated results for GitHub review. Kept the public site URL, experiment implementation and published numerical results unchanged.
+- Formatted the HTML, CSS and JavaScript sources for readable maintenance.
+
+
 ## 0.2.0 — 2026-09-26
 
 - Added an installable Python package and CLI for explicit data validation, synthetic fixtures, four classification tasks, nested evaluation and figure generation.

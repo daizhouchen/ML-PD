@@ -1,0 +1,4 @@
+# Keep generated reports collapsed in review; editable code remains visible.
+docs/results/** linguist-generated=true
+# Preserve historical notebooks as documentation, outside the current codebase.
+archive/** linguist-documentation=true

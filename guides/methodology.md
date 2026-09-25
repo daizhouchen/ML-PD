@@ -1,5 +1,7 @@
 # ML-PD 方法说明
 
+[文档目录](README.md) · [项目首页](../README.md)
+
 ## 研究问题与边界
 
 当前问题是区分 Control、Prodromal、PD 的横断面分类，不是诊断系统，也没有估计未来病程或发病时间。原始合作数据未公开，旧 Notebook 输出不能补足独立验证。新图表来自 make_classification 合成数值数据，特征名使用 synthetic_feature_*。

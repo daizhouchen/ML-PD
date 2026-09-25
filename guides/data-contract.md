@@ -1,5 +1,7 @@
 # 数据接入契约
 
+[文档目录](README.md) · [项目首页](../README.md)
+
 输入为 UTF-8 CSV 与 JSON schema。示例为 [`configs/schema.example.json`](../configs/schema.example.json)。只有 feature_columns 显式列出的数值列进入模型，不再依赖列位置。
 
 | 字段 | 要求 |

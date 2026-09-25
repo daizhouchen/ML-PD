@@ -1,4 +1,4 @@
-<p><img src="assets/research-cover.svg" alt="ML-PD · 从探索性 Notebook 到可复现实验" width="100%"></p>
+<p><img src="docs/assets/research-cover.svg" alt="ML-PD · 从探索性 Notebook 到可复现实验" width="100%"></p>
 
 # ML-PD · 代谢组学分类研究工作流
 
@@ -6,27 +6,37 @@
 ![Python 3.12](https://img.shields.io/badge/Python-3.12-32635B)
 [![License: MIT](https://img.shields.io/badge/License-MIT-B7793D)](LICENSE)
 
-研究健康对照、前驱期与帕金森病三组代谢组学数据的分类问题。保留早期探索性 Notebook，同时提供**受试者隔离、嵌套交叉验证、可追踪结果的命令行实验流程**。
+围绕健康对照、前驱期与帕金森病三组代谢组学数据，提供从输入校验到模型比较、结果追踪和交互展示的可复现实验流程。
 
-**[打开交互研究展示 →](https://daizhouchen.github.io/ML-PD/)** · [实验方法](docs/methodology.md) · [数据契约](docs/data-contract.md) · [历史实验审查](docs/legacy-audit.md)
+> 原始合作数据未公开，新流程尚未在该数据上重新验证。公开图表来自固定种子的**合成数值数据**，用于验证程序流程，不代表真实代谢物、患者或临床效果；横断面分类不等于病程预测。
 
-> **项目边界**：原始合作数据未公开，本次工程改进尚未在该数据上重新验证。公开图表来自固定种子的**合成数值数据**，用于验证代码与展示流程，不代表真实代谢物、患者或临床效果。横断面分类不等于疾病进展预测。
+## 从这里开始
 
-## 现在可以完成什么
-
-| 环节 | 已实现 |
+| 你想做什么 | 入口 |
 |---|---|
-| 数据接入 | 显式指定标签、样本、受试者与特征列；校验标识符泄漏、未知标签、重复记录、无穷值和冲突标签 |
-| 实验任务 | 三分类，以及 PD–Control、Prodromal–Control、PD–Prodromal 三组两两分类 |
-| 模型对照 | 类别先验基线、逻辑回归、线性 SVM、随机森林、决策树、GBM、XGBoost |
-| 特征处理 | 每个训练折独立学习缺失率过滤、常量过滤、中位数填补、标准化与 RFE |
-| 评估设计 | 外层评估、内层调参；重复样本按受试者分组，两个层级都禁止同一受试者跨训练与验证 |
-| 研究产物 | 各折指标、折间标准差、逐类 ROC、OOF 混淆矩阵、特征入选频率、划分记录与版本指纹 |
-| 展示与验证 | 可切换任务/模型的静态报告、可下载结果 JSON、独立 SVG 图、测试与 GitHub Actions |
+| 先看项目和交互结果 | **[打开研究展示 →](https://daizhouchen.github.io/ML-PD/)** |
+| 在本地跑一次实验 | [下面的快速开始](#五分钟开始) · [完整运行指南](guides/quickstart.md) · [Notebook](notebooks/01_reproduce.ipynb) |
+| 理解实验是否可靠 | [方法与指标](guides/methodology.md) · [数据接入契约](guides/data-contract.md) |
+| 阅读或修改代码 | [模块地图](guides/architecture.md) · [贡献指南](CONTRIBUTING.md) |
+| 追溯早期实验 | [历史文件索引](archive/README.md) · [历史方法审查](guides/legacy-audit.md) |
+
+## 当前流程
+
+**4 个分类任务 × 7 个对照模型**：三分类及三组两两分类；类别先验基线、逻辑回归、线性 SVM、随机森林、决策树、GBM 与 XGBoost。
+
+```mermaid
+flowchart LR
+    A[数据契约与校验] --> B[按受试者隔离外层测试]
+    B --> C[内层重新学习预处理与 RFE]
+    C --> D[内层选择模型参数]
+    D --> E[外层评估与结果留痕]
+```
+
+输出包含各折指标、折间标准差、OOF 混淆矩阵、逐类 ROC、特征入选频率和数据/版本指纹。完整定义见[方法说明](guides/methodology.md)，产物位置见[运行指南](guides/quickstart.md#一次运行留下什么)。
 
 ## 五分钟开始
 
-推荐 Python 3.12，在隔离环境安装锁定依赖：
+使用 Python 3.12，在仓库根目录执行：
 
 ```bash
 git clone https://github.com/daizhouchen/ML-PD.git
@@ -42,84 +52,35 @@ mlpd validate --data data/demo/synthetic.csv --schema data/demo/schema.json
 mlpd run --data data/demo/synthetic.csv --schema data/demo/schema.json --output runs/quick --models dummy logistic --outer-folds 3 --inner-folds 2
 ```
 
-最后一条实际运行四个任务，生成 `runs/quick/report.json` 和 `figures/`。输入与结果目录默认被 Git 忽略，命令不会覆盖已有数据或非空实验目录。
+这会用两个模型跑完四个任务，输出 `runs/quick/report.json` 和 SVG 图。再次运行请换一个输出目录。需要全部模型、私有数据、Notebook 或本地网页预览，继续看[完整运行指南](guides/quickstart.md)。
 
-运行全部七个模型（运行时间取决于机器）：
-
-```bash
-mlpd run --data data/demo/synthetic.csv --schema data/demo/schema.json --output runs/full --outer-folds 3 --inner-folds 3
-mlpd publish-demo --report runs/full/report.json --output docs/results
-python -m http.server 8000 --directory docs
-```
-
-访问 `http://localhost:8000` 浏览报告。正式研究默认 5 外折、3 内折；应在看结果前按独立受试者数确定方案，不能为更好看的分数反复换种子或折数。
-
-## 方法为什么这样改
-
-```mermaid
-flowchart LR
-    A[显式数据契约] --> B[按受试者划分外层训练 / 测试]
-    B --> C[仅外层训练数据进入内层 CV]
-    C --> D[每折重学过滤 / 填补 / 标准化 / RFE]
-    D --> E[搜索特征数量与模型参数]
-    E --> F[最佳流程重拟合外层训练集]
-    F --> G[对未见外层测试折预测一次]
-    G --> H[汇总指标与运行指纹]
-```
-
-早期 RFE Notebook 在全量数据上筛选后再划分测试集，会使测试信息参与筛选。新流程将 RFE 与全部预处理一起放进内层搜索的 Pipeline。内层用 **balanced accuracy** 选参数，外层只评估。
-
-RFE 使用逻辑回归作为共同排序器，搜索保留 50% 或全部可用特征；它与历史模型专属 RFECV 不是同一实验。详见[方法与限制](docs/methodology.md)。
-
-## 一次运行留下什么
+## 仓库布局
 
 ```text
-runs/<run-name>/
-├── report.json             # 配置、环境、数据指纹、全部任务与模型结果
-├── fold_metrics.csv        # 每个外层测试折的指标
-├── feature_stability.csv   # 跨外折入选频率，不是生物标志物结论
-├── split_assignments.csv   # 本地样本/受试者与外折归属，不应公开
-└── figures/                # 带数据类型标注的独立 SVG 图
+ML-PD/
+├── src/mlpd/          当前 Python 实现：数据 → 模型 → 评估 → 报告
+├── tests/             数据边界、训练范围、受试者隔离与运行测试
+├── configs/           数据 schema 示例
+├── notebooks/         当前流程的交互复现入口
+├── guides/            运行指南、实验方法、数据契约与模块地图
+├── docs/              GitHub Pages 展示站点
+│   ├── assets/        样式、交互脚本与视觉资源
+│   └── results/       自动导出的合成聚合结果与图表
+├── archive/           原始 Notebook 与旧素材，只用于追溯
+├── .github/workflows/ 持续集成
+├── pyproject.toml     包元数据、依赖范围与 CLI 入口
+└── requirements-lock.txt  已验证的依赖版本
 ```
 
-展示默认以逻辑回归为参考，提供全部模型切换，不按演示分数挑冠军。折间 SD **不是置信区间**；ROC 是各外折曲线的平均，SVM 分数不解释为概率。
+运行时产生的 `data/` 和 `runs/` 默认不纳入 Git。研究说明集中在 [guides/](guides/README.md)，网页维护说明在 [docs/](docs/README.md)，旧实验不作为新版运行入口。
 
-## 接入真实数据
-
-阅读[数据契约](docs/data-contract.md)，复制 `configs/schema.example.json`，显式列出允许使用的特征。输入应保留缺失值；若已在全量样本上做过填补、标准化或筛选，新 Pipeline 无法撤销既有泄漏。
-
-```bash
-mlpd validate --data data/private/cohort.csv --schema configs/my-schema.json
-mlpd run --data data/private/cohort.csv --schema configs/my-schema.json --output runs/private-study
-```
-
-`data_kind` 设为 `private`。自动公开导出仅接受合成演示结果，不会复制样本级划分文件。真实结果需单独完成来源授权与披露审阅。
-
-## 代码地图
-
-```text
-src/mlpd/           数据校验、模型、嵌套评估、图表和 CLI
-tests/              数据边界、受试者隔离、训练范围与完整运行测试
-configs/            私有数据 schema 示例
-docs/               交互展示、方法、数据契约、历史审查、合成结果
-notebooks/          新流程最小复现入口
-ML.ipynb            历史三分类实验，保留供溯源
-RFE.ipynb           历史特征筛选实验，存在方法局限
-ML - 二分类/         历史两两分类实验
-RFE - 二分类/        历史两两 RFE 实验
-```
-
-需要交互 Notebook 时，另装 `python -m pip install -e ".[notebook]"`，再用该环境打开 `notebooks/01_reproduce.ipynb`。
-
-## 验证与后续研究
+## 开发与后续研究
 
 ```bash
 python -m pytest -q
 python -m build
 ```
 
-尚需真实数据支持：原始未泄漏数据重跑；采集批次、站点和混杂因素敏感性分析；候选特征稳定性验证；独立外部队列评估。进展预测需要随访时间与结局的纵向方案，不在现有横断面流程中推断。
-
-方法依据：[数据泄漏与 Pipeline](https://scikit-learn.org/stable/common_pitfalls.html)、[嵌套交叉验证](https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html)、[分层分组划分](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedGroupKFold.html)。
+下一阶段需要原始未泄漏数据重跑、批次与混杂因素敏感性分析、候选特征稳定性检验以及独立外部队列评估。参见[方法边界](guides/methodology.md#后续验证)和[变更记录](CHANGELOG.md)。
 
 MIT · [戴宙辰的实验集](https://github.com/daizhouchen)

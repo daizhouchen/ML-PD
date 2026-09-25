@@ -1,24 +1,286 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#234C43"><title>ML-PD · 可复现的代谢组学分类研究</title><meta name="description" content="从探索性 Notebook 到受试者隔离的嵌套交叉验证。查看 ML-PD 实验方法、合成流程演示、模型对照与研究边界。"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="site.css"></head>
-<body>
-<a class="skip" href="#main">跳到正文</a>
-<header class="topbar wrap"><a class="brand" href="#">ML-PD<span>RESEARCH NOTES / 02</span></a><nav aria-label="页面导航"><a href="#method">研究方法</a><a href="#results">结果探索</a><a href="#reproduce">复现</a><a href="https://github.com/daizhouchen/ML-PD">GitHub ↗</a></nav></header>
-<main id="main">
-<section class="hero wrap"><div><p class="eyebrow">METABOLOMICS × MACHINE LEARNING</p><h1>从代谢特征，<br>走向可检验的<span>研究。</span></h1><p class="hero-intro">围绕健康对照、前驱期与帕金森病的分类问题，<br class="desktop">把数据、实验和结论之间的每一步交代清楚。</p><div class="actions"><a class="button" href="#results">探索实验流程 <span>↓</span></a><a class="text-link" href="https://github.com/daizhouchen/ML-PD">阅读代码 ↗</a></div><div class="hero-facts"><div><b>受试者隔离</b><span>训练与测试不交叉</span></div><div><b>嵌套验证</b><span>调参与评估分开</span></div><div><b>可追溯结果</b><span>配置、划分与版本留痕</span></div></div></div><aside class="research-sheet"><div class="sheet-top"><span>STUDY / ML-PD</span><span>方法示意</span></div><h2>先划分，<br>再学习。</h2><div class="folds" aria-label="外层测试折与训练折交替的示意图"><div><i></i><i></i><i></i><i class="test"></i></div><div><i></i><i></i><i class="test"></i><i></i></div><div><i></i><i class="test"></i><i></i><i></i></div><div><i class="test"></i><i></i><i></i><i></i></div></div><div class="legend"><span><i></i>训练折内完成筛选与调参</span><span><i class="test"></i>外层仅用于评估</span></div><p>让未见过的样本，<br>检验模型学到了什么。</p></aside></section>
-<div class="data-note wrap"><span class="note-label">数据与证据</span><p>原始合作数据未公开，新流程尚未在原始数据上重跑。下方结果全部来自<strong>合成数值数据</strong>，展示实验代码如何运行，不代表真实代谢物、患者或临床性能。</p></div>
-<section class="section wrap" id="method"><div class="section-heading"><div><p class="eyebrow">01 / RESEARCH DESIGN</p><h2>把评估放在正确的位置。</h2></div><a href="https://github.com/daizhouchen/ML-PD/blob/main/docs/methodology.md">完整方法说明 ↗</a></div><div class="method-layout"><p class="section-lede">过去的实验容易在筛选特征时提前看到测试数据。这次从数据入口开始，重新划清训练和评估的边界。</p><ol class="pipeline"><li><span>01</span><div><h3>明确数据契约</h3><p>显式列出特征、标签和受试者标识，先排查重复、错误标签与缺失问题。</p></div></li><li><span>02</span><div><h3>内层学习与选择</h3><p>在每个训练折内重新完成过滤、填补、标准化和 RFE，再选择模型参数。</p></div></li><li><span>03</span><div><h3>外层只做评估</h3><p>对未见样本预测一次，保留各折结果与划分指纹，观察表现和变动。</p></div></li></ol></div></section>
-<section class="results-section" id="results"><div class="wrap"><div class="section-heading"><div><p class="eyebrow">02 / EXPERIMENT EXPLORER</p><h2>把结果打开看。</h2></div><span class="badge">合成数据 · 流程演示</span></div><p class="section-lede compact">切换分类任务，对照全部模型，再查看某个模型的错误分布与特征选择。默认参考模型为逻辑回归，不根据分数挑选展示对象。</p><p id="load-status" role="status">正在读取已执行的实验结果…</p><div id="explorer" hidden>
-<div class="task-tabs" role="group" aria-label="选择分类任务"><button data-task="three-class" aria-pressed="true">三组分类</button><button data-task="pd-control" aria-pressed="false">PD / Control</button><button data-task="prodromal-control" aria-pressed="false">Prodromal / Control</button><button data-task="pd-prodromal" aria-pressed="false">PD / Prodromal</button></div>
-<div id="run-meta" class="run-meta"></div>
-<div class="comparison panel"><div class="panel-heading"><div><span class="caption">A / 同一划分下的模型对照</span><h3>每一折都留下记录</h3></div><label>比较指标<select id="metric-select"><option value="balanced_accuracy">Balanced accuracy</option><option value="macro_f1">Macro F1</option><option value="macro_ovr_auc">Macro OVR AUC</option><option value="accuracy">Accuracy</option></select></label></div><div id="comparison-chart"></div><p class="chart-note">点：外折得分 · 菱形：均值 · 横线：折间标准差（不是置信区间）。先验基线用于提供最低对照。</p><details><summary>查看精确数值</summary><div class="table-scroll"><table><caption id="metric-caption">模型指标</caption><thead><tr><th scope="col">模型</th><th scope="col">均值</th><th scope="col">折间 SD</th></tr></thead><tbody id="metric-table"></tbody></table></div></details></div>
-<div class="model-toolbar"><div><span class="caption">B / 单个模型的表现与局限</span><h3>错误发生在哪里？</h3></div><label>查看模型<select id="model-select"></select></label></div>
-<div class="diagnostic-grid"><article class="panel"><div class="panel-heading"><h3>逐类 ROC</h3><span>外折平均</span></div><div id="roc-chart"></div><p class="chart-note">逐折计算 one-vs-rest ROC 后平均；SVM 决策分数不是概率。</p></article><article class="panel"><div class="panel-heading"><h3>混淆矩阵</h3><span>未见样本预测</span></div><div id="confusion-chart"></div><p class="chart-note">行是真实标签，列是预测标签。每个样本只贡献一次外折预测。</p></article></div>
-<article class="stability panel"><div><span class="caption">C / 特征选择的稳定性</span><h3>被选中，不等于被证实。</h3><p>这里统计各外折最终流程中，特征被保留的频率。相关特征可能互相替代；合成特征没有代谢物含义，入选次数也不是临床有效性证据。</p></div><div id="feature-chart"></div></article>
-<div class="result-links"><a href="results/demo-results.json" download>下载聚合结果 JSON ↓</a><a id="figure-link" href="results/figures/three-class-comparison.svg" target="_blank" rel="noopener">打开独立图表 ↗</a><span id="fingerprint"></span></div></div>
-<noscript><p>交互图表需要 JavaScript。可直接<a href="results/figures/three-class-comparison.svg">查看三分类图表</a>或<a href="results/demo-results.json">读取结果 JSON</a>。</p></noscript></div></section>
-<section class="section wrap" id="reproduce"><div class="section-heading"><div><p class="eyebrow">03 / REPRODUCE THE WORK</p><h2>从一条命令，回到每一步。</h2></div><a href="https://github.com/daizhouchen/ML-PD#五分钟开始">安装与完整命令 ↗</a></div><div class="reproduce-layout"><div><h3>先用演示数据走通流程</h3><p>安装仓库的锁定环境后，生成合成样例。运行四个分类任务，结果、图表与审计记录落在独立目录。</p><a class="text-link" href="https://github.com/daizhouchen/ML-PD/blob/main/docs/data-contract.md">接入真实数据的要求 →</a></div><div class="code-panel"><div><span>TERMINAL / PYTHON 3.12</span><button id="copy-command" type="button">复制命令</button></div><pre id="run-command">mlpd demo --output data/demo
-mlpd run --data data/demo/synthetic.csv --schema data/demo/schema.json --output runs/quick --models dummy logistic --outer-folds 3 --inner-folds 2</pre><span id="copy-status" role="status"></span></div></div></section>
-<section class="limits wrap"><span class="eyebrow">04 / WHAT REMAINS OPEN</span><h2>还有哪些结论，<br>现在不能下。</h2><div class="limits-grid"><article><span>真实数据</span><p>需回到未经全量预处理的原始数据，重新执行统一评估流程。</p></article><article><span>泛化能力</span><p>仍需独立队列、采集批次与混杂因素分析；当前没有外部验证结论。</p></article><article><span>疾病进展</span><p>三类人群的横断面分类，不能替代有随访时间与结局的纵向预测。</p></article></div></section>
-</main><footer class="wrap"><a class="brand" href="#">ML-PD</a><p>戴宙辰 · 研究与工程实践</p><div><a href="https://github.com/daizhouchen/ML-PD/blob/main/docs/legacy-audit.md">历史实验审查</a><a href="https://daizhouchen.github.io/">作品集 ↗</a></div></footer><script src="site.js" defer></script>
-</body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#234C43" />
+    <title>ML-PD · 可复现的代谢组学分类研究</title>
+    <meta
+      name="description"
+      content="从探索性 Notebook 到受试者隔离的嵌套交叉验证。查看 ML-PD 实验方法、合成流程演示、模型对照与研究边界。"
+    />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/site.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到正文</a>
+    <header class="topbar wrap">
+      <a class="brand" href="#">ML-PD<span>RESEARCH NOTES / 02</span></a>
+      <nav aria-label="页面导航">
+        <a href="#method">研究方法</a><a href="#results">结果探索</a><a href="#reproduce">复现</a
+        ><a href="https://github.com/daizhouchen/ML-PD">GitHub ↗</a>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero wrap">
+        <div>
+          <p class="eyebrow">METABOLOMICS × MACHINE LEARNING</p>
+          <h1>从代谢特征，<br />走向可检验的<span>研究。</span></h1>
+          <p class="hero-intro">
+            围绕健康对照、前驱期与帕金森病的分类问题，<br
+              class="desktop"
+            />把数据、实验和结论之间的每一步交代清楚。
+          </p>
+          <div class="actions">
+            <a class="button" href="#results">探索实验流程 <span>↓</span></a
+            ><a class="text-link" href="https://github.com/daizhouchen/ML-PD">阅读代码 ↗</a>
+          </div>
+          <div class="hero-facts">
+            <div><b>受试者隔离</b><span>训练与测试不交叉</span></div>
+            <div><b>嵌套验证</b><span>调参与评估分开</span></div>
+            <div><b>可追溯结果</b><span>配置、划分与版本留痕</span></div>
+          </div>
+        </div>
+        <aside class="research-sheet">
+          <div class="sheet-top"><span>STUDY / ML-PD</span><span>方法示意</span></div>
+          <h2>先划分，<br />再学习。</h2>
+          <div class="folds" aria-label="外层测试折与训练折交替的示意图">
+            <div><i></i><i></i><i></i><i class="test"></i></div>
+            <div><i></i><i></i><i class="test"></i><i></i></div>
+            <div><i></i><i class="test"></i><i></i><i></i></div>
+            <div><i class="test"></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="legend">
+            <span><i></i>训练折内完成筛选与调参</span
+            ><span><i class="test"></i>外层仅用于评估</span>
+          </div>
+          <p>让未见过的样本，<br />检验模型学到了什么。</p>
+        </aside>
+      </section>
+      <div class="data-note wrap">
+        <span class="note-label">数据与证据</span>
+        <p>
+          原始合作数据未公开，新流程尚未在原始数据上重跑。下方结果全部来自<strong>合成数值数据</strong>，展示实验代码如何运行，不代表真实代谢物、患者或临床性能。
+        </p>
+      </div>
+      <section class="section wrap" id="method">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">01 / RESEARCH DESIGN</p>
+            <h2>把评估放在正确的位置。</h2>
+          </div>
+          <a href="https://github.com/daizhouchen/ML-PD/blob/main/guides/methodology.md"
+            >完整方法说明 ↗</a
+          >
+        </div>
+        <div class="method-layout">
+          <p class="section-lede">
+            过去的实验容易在筛选特征时提前看到测试数据。这次从数据入口开始，重新划清训练和评估的边界。
+          </p>
+          <ol class="pipeline">
+            <li>
+              <span>01</span>
+              <div>
+                <h3>明确数据契约</h3>
+                <p>显式列出特征、标签和受试者标识，先排查重复、错误标签与缺失问题。</p>
+              </div>
+            </li>
+            <li>
+              <span>02</span>
+              <div>
+                <h3>内层学习与选择</h3>
+                <p>在每个训练折内重新完成过滤、填补、标准化和 RFE，再选择模型参数。</p>
+              </div>
+            </li>
+            <li>
+              <span>03</span>
+              <div>
+                <h3>外层只做评估</h3>
+                <p>对未见样本预测一次，保留各折结果与划分指纹，观察表现和变动。</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+      <section class="results-section" id="results">
+        <div class="wrap">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">02 / EXPERIMENT EXPLORER</p>
+              <h2>把结果打开看。</h2>
+            </div>
+            <span class="badge">合成数据 · 流程演示</span>
+          </div>
+          <p class="section-lede compact">
+            切换分类任务，对照全部模型，再查看某个模型的错误分布与特征选择。默认参考模型为逻辑回归，不根据分数挑选展示对象。
+          </p>
+          <p id="load-status" role="status">正在读取已执行的实验结果…</p>
+          <div id="explorer" hidden>
+            <div class="task-tabs" role="group" aria-label="选择分类任务">
+              <button data-task="three-class" aria-pressed="true">三组分类</button
+              ><button data-task="pd-control" aria-pressed="false">PD / Control</button
+              ><button data-task="prodromal-control" aria-pressed="false">
+                Prodromal / Control</button
+              ><button data-task="pd-prodromal" aria-pressed="false">PD / Prodromal</button>
+            </div>
+            <div id="run-meta" class="run-meta"></div>
+            <div class="comparison panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="caption">A / 同一划分下的模型对照</span>
+                  <h3>每一折都留下记录</h3>
+                </div>
+                <label
+                  >比较指标<select id="metric-select">
+                    <option value="balanced_accuracy">Balanced accuracy</option>
+                    <option value="macro_f1">Macro F1</option>
+                    <option value="macro_ovr_auc">Macro OVR AUC</option>
+                    <option value="accuracy">Accuracy</option>
+                  </select></label
+                >
+              </div>
+              <div id="comparison-chart"></div>
+              <p class="chart-note">
+                点：外折得分 · 菱形：均值 ·
+                横线：折间标准差（不是置信区间）。先验基线用于提供最低对照。
+              </p>
+              <details>
+                <summary>查看精确数值</summary>
+                <div class="table-scroll">
+                  <table>
+                    <caption id="metric-caption">
+                      模型指标
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">模型</th>
+                        <th scope="col">均值</th>
+                        <th scope="col">折间 SD</th>
+                      </tr>
+                    </thead>
+                    <tbody id="metric-table"></tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+            <div class="model-toolbar">
+              <div>
+                <span class="caption">B / 单个模型的表现与局限</span>
+                <h3>错误发生在哪里？</h3>
+              </div>
+              <label>查看模型<select id="model-select"></select></label>
+            </div>
+            <div class="diagnostic-grid">
+              <article class="panel">
+                <div class="panel-heading">
+                  <h3>逐类 ROC</h3>
+                  <span>外折平均</span>
+                </div>
+                <div id="roc-chart"></div>
+                <p class="chart-note">逐折计算 one-vs-rest ROC 后平均；SVM 决策分数不是概率。</p>
+              </article>
+              <article class="panel">
+                <div class="panel-heading">
+                  <h3>混淆矩阵</h3>
+                  <span>未见样本预测</span>
+                </div>
+                <div id="confusion-chart"></div>
+                <p class="chart-note">行是真实标签，列是预测标签。每个样本只贡献一次外折预测。</p>
+              </article>
+            </div>
+            <article class="stability panel">
+              <div>
+                <span class="caption">C / 特征选择的稳定性</span>
+                <h3>被选中，不等于被证实。</h3>
+                <p>
+                  这里统计各外折最终流程中，特征被保留的频率。相关特征可能互相替代；合成特征没有代谢物含义，入选次数也不是临床有效性证据。
+                </p>
+              </div>
+              <div id="feature-chart"></div>
+            </article>
+            <div class="result-links">
+              <a href="results/demo-results.json" download>下载聚合结果 JSON ↓</a
+              ><a
+                id="figure-link"
+                href="results/figures/three-class-comparison.svg"
+                target="_blank"
+                rel="noopener"
+                >打开独立图表 ↗</a
+              ><span id="fingerprint"></span>
+            </div>
+          </div>
+          <noscript
+            ><p>
+              交互图表需要 JavaScript。可直接<a href="results/figures/three-class-comparison.svg"
+                >查看三分类图表</a
+              >或<a href="results/demo-results.json">读取结果 JSON</a>。
+            </p></noscript
+          >
+        </div>
+      </section>
+      <section class="section wrap" id="reproduce">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">03 / REPRODUCE THE WORK</p>
+            <h2>从一条命令，回到每一步。</h2>
+          </div>
+          <a href="https://github.com/daizhouchen/ML-PD/blob/main/guides/quickstart.md"
+            >安装与完整命令 ↗</a
+          >
+        </div>
+        <div class="reproduce-layout">
+          <div>
+            <h3>先用演示数据走通流程</h3>
+            <p>
+              安装仓库的锁定环境后，生成合成样例。运行四个分类任务，结果、图表与审计记录落在独立目录。
+            </p>
+            <a
+              class="text-link"
+              href="https://github.com/daizhouchen/ML-PD/blob/main/guides/data-contract.md"
+              >接入真实数据的要求 →</a
+            >
+          </div>
+          <div class="code-panel">
+            <div>
+              <span>TERMINAL / PYTHON 3.12</span
+              ><button id="copy-command" type="button">复制命令</button>
+            </div>
+            <pre id="run-command">
+mlpd demo --output data/demo
+mlpd run --data data/demo/synthetic.csv --schema data/demo/schema.json --output runs/quick --models dummy logistic --outer-folds 3 --inner-folds 2</pre
+            >
+            <span id="copy-status" role="status"></span>
+          </div>
+        </div>
+      </section>
+      <section class="limits wrap">
+        <span class="eyebrow">04 / WHAT REMAINS OPEN</span>
+        <h2>还有哪些结论，<br />现在不能下。</h2>
+        <div class="limits-grid">
+          <article>
+            <span>真实数据</span>
+            <p>需回到未经全量预处理的原始数据，重新执行统一评估流程。</p>
+          </article>
+          <article>
+            <span>泛化能力</span>
+            <p>仍需独立队列、采集批次与混杂因素分析；当前没有外部验证结论。</p>
+          </article>
+          <article>
+            <span>疾病进展</span>
+            <p>三类人群的横断面分类，不能替代有随访时间与结局的纵向预测。</p>
+          </article>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap">
+      <a class="brand" href="#">ML-PD</a>
+      <p>戴宙辰 · 研究与工程实践</p>
+      <div>
+        <a href="https://github.com/daizhouchen/ML-PD/blob/main/guides/legacy-audit.md"
+          >历史实验审查</a
+        ><a href="https://daizhouchen.github.io/">作品集 ↗</a>
+      </div>
+    </footer>
+    <script src="assets/site.js" defer></script>
+  </body>
+</html>
