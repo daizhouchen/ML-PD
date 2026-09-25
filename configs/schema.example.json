@@ -1,0 +1,9 @@
+{
+  "label_column": "group",
+  "sample_id_column": "sample_id",
+  "subject_id_column": "subject_id",
+  "data_kind": "private",
+  "label_mapping": {"Control": "Control", "Prodromal": "Prodromal", "PD": "PD"},
+  "feature_columns": ["metabolite_001", "metabolite_002", "metabolite_003"],
+  "description": "Replace with an explicitly reviewed feature list. Identifiers, batches and outcomes are not metabolite features."
+}

@@ -1,0 +1,23 @@
+name: Research workflow checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install -r requirements-lock.txt
+      - run: python -m pip install --no-deps -e .
+      - run: python -m pytest -q
+      - run: mlpd demo --output data/ci --samples 90
+      - run: mlpd validate --data data/ci/synthetic.csv --schema data/ci/schema.json
+      - run: mlpd run --data data/ci/synthetic.csv --schema data/ci/schema.json --output runs/ci --models dummy logistic --outer-folds 3 --inner-folds 2
+      - run: python -m build
