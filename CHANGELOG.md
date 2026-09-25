@@ -1,5 +1,10 @@
 # Changelog
 
+## Public showcase copy — 2026-09-26
+
+- Reframed the showcase around research design, interactive results and reusable project deliverables.
+- Replaced repeated caveats with concise chart-reading guidance and a clear synthetic-data source label; kept detailed methodology and research limitations in the research guides.
+
 ## Repository organization — 2026-09-26
 
 - Separated current Python code (`src/`), current tutorials (`notebooks/`), research/developer guides (`guides/`), the Pages site (`docs/`) and historical artifacts (`archive/`).

@@ -7,7 +7,7 @@
     <title>ML-PD · 可复现的代谢组学分类研究</title>
     <meta
       name="description"
-      content="从探索性 Notebook 到受试者隔离的嵌套交叉验证。查看 ML-PD 实验方法、合成流程演示、模型对照与研究边界。"
+      content="围绕健康对照、前驱期与帕金森病的代谢组学分类研究，整合特征筛选、多模型对照与交互可视化，呈现完整的研究工程实践。"
     />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="assets/site.css" />
@@ -58,16 +58,17 @@
         </aside>
       </section>
       <div class="data-note wrap">
-        <span class="note-label">数据与证据</span>
+        <span class="note-label">项目概览</span>
         <p>
-          原始合作数据未公开，新流程尚未在原始数据上重跑。下方结果全部来自<strong>合成数值数据</strong>，展示实验代码如何运行，不代表真实代谢物、患者或临床性能。
+          <strong>4 个分类任务 · 7 个对照模型</strong
+          >。从数据接入、特征筛选到模型评估与结果可视化，构建一套可复现的研究流程。
         </p>
       </div>
       <section class="section wrap" id="method">
         <div class="section-heading">
           <div>
             <p class="eyebrow">01 / RESEARCH DESIGN</p>
-            <h2>把评估放在正确的位置。</h2>
+            <h2>从输入到评估，完整记录。</h2>
           </div>
           <a href="https://github.com/daizhouchen/ML-PD/blob/main/guides/methodology.md"
             >完整方法说明 ↗</a
@@ -75,7 +76,7 @@
         </div>
         <div class="method-layout">
           <p class="section-lede">
-            过去的实验容易在筛选特征时提前看到测试数据。这次从数据入口开始，重新划清训练和评估的边界。
+            以受试者为单位组织训练与评估，在统一的数据处理流程和划分方案下比较模型，让每一步实验都有清晰的配置与记录。
           </p>
           <ol class="pipeline">
             <li>
@@ -109,10 +110,10 @@
               <p class="eyebrow">02 / EXPERIMENT EXPLORER</p>
               <h2>把结果打开看。</h2>
             </div>
-            <span class="badge">合成数据 · 流程演示</span>
+            <span class="badge">数据来源：合成演示集</span>
           </div>
           <p class="section-lede compact">
-            切换分类任务，对照全部模型，再查看某个模型的错误分布与特征选择。默认参考模型为逻辑回归，不根据分数挑选展示对象。
+            切换分类任务与比较指标，查看模型的整体表现，再深入观察逐类识别结果与特征选择。默认从逻辑回归开始探索。
           </p>
           <p id="load-status" role="status">正在读取已执行的实验结果…</p>
           <div id="explorer" hidden>
@@ -141,8 +142,7 @@
               </div>
               <div id="comparison-chart"></div>
               <p class="chart-note">
-                点：外折得分 · 菱形：均值 ·
-                横线：折间标准差（不是置信区间）。先验基线用于提供最低对照。
+                点：外折得分 · 菱形：均值 · 横线：折间标准差。先验基线作为模型比较的参考。
               </p>
               <details>
                 <summary>查看精确数值</summary>
@@ -165,8 +165,8 @@
             </div>
             <div class="model-toolbar">
               <div>
-                <span class="caption">B / 单个模型的表现与局限</span>
-                <h3>错误发生在哪里？</h3>
+                <span class="caption">B / 单个模型的分类表现</span>
+                <h3>看清每一类的识别表现。</h3>
               </div>
               <label>查看模型<select id="model-select"></select></label>
             </div>
@@ -177,7 +177,7 @@
                   <span>外折平均</span>
                 </div>
                 <div id="roc-chart"></div>
-                <p class="chart-note">逐折计算 one-vs-rest ROC 后平均；SVM 决策分数不是概率。</p>
+                <p class="chart-note">各类别的 one-vs-rest ROC，按外层测试折取平均。</p>
               </article>
               <article class="panel">
                 <div class="panel-heading">
@@ -191,10 +191,8 @@
             <article class="stability panel">
               <div>
                 <span class="caption">C / 特征选择的稳定性</span>
-                <h3>被选中，不等于被证实。</h3>
-                <p>
-                  这里统计各外折最终流程中，特征被保留的频率。相关特征可能互相替代；合成特征没有代谢物含义，入选次数也不是临床有效性证据。
-                </p>
+                <h3>哪些特征反复入选？</h3>
+                <p>在不同外折中追踪特征的保留情况，用入选频率呈现特征选择的一致性。</p>
               </div>
               <div id="feature-chart"></div>
             </article>
@@ -253,21 +251,21 @@ mlpd run --data data/demo/synthetic.csv --schema data/demo/schema.json --output 
           </div>
         </div>
       </section>
-      <section class="limits wrap">
-        <span class="eyebrow">04 / WHAT REMAINS OPEN</span>
-        <h2>还有哪些结论，<br />现在不能下。</h2>
-        <div class="limits-grid">
+      <section class="deliverables wrap">
+        <span class="eyebrow">04 / PROJECT DELIVERABLES</span>
+        <h2>让研究过程，<br />成为可复用的成果。</h2>
+        <div class="deliverables-grid">
           <article>
-            <span>真实数据</span>
-            <p>需回到未经全量预处理的原始数据，重新执行统一评估流程。</p>
+            <span>实验工作流</span>
+            <p>从数据校验到嵌套评估，通过统一命令执行实验，保存配置、划分与指标。</p>
           </article>
           <article>
-            <span>泛化能力</span>
-            <p>仍需独立队列、采集批次与混杂因素分析；当前没有外部验证结论。</p>
+            <span>结果可视化</span>
+            <p>模型对照、逐类 ROC、混淆矩阵与特征入选频率，支持交互查看和独立图表下载。</p>
           </article>
           <article>
-            <span>疾病进展</span>
-            <p>三类人群的横断面分类，不能替代有随访时间与结局的纵向预测。</p>
+            <span>代码与文档</span>
+            <p>模块化 Python 实现、Notebook 复现教程和完整研究指南，方便阅读、复用与扩展。</p>
           </article>
         </div>
       </section>
@@ -276,8 +274,7 @@ mlpd run --data data/demo/synthetic.csv --schema data/demo/schema.json --output 
       <a class="brand" href="#">ML-PD</a>
       <p>戴宙辰 · 研究与工程实践</p>
       <div>
-        <a href="https://github.com/daizhouchen/ML-PD/blob/main/guides/legacy-audit.md"
-          >历史实验审查</a
+        <a href="https://github.com/daizhouchen/ML-PD/blob/main/guides/README.md">项目文档</a
         ><a href="https://daizhouchen.github.io/">作品集 ↗</a>
       </div>
     </footer>

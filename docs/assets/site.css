@@ -594,28 +594,28 @@ caption {
   min-height: 20px;
   margin-top: 8px;
 }
-.limits {
+.deliverables {
   padding: 40px 0 55px;
   border-top: 1px solid var(--line);
 }
-.limits h2 {
+.deliverables h2 {
   font-size: 31px;
 }
-.limits-grid {
+.deliverables-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 45px;
   margin-top: 28px;
 }
-.limits-grid article {
+.deliverables-grid article {
   border-top: 1px solid var(--line);
   padding-top: 15px;
 }
-.limits-grid span {
+.deliverables-grid span {
   font-size: 12px;
   color: var(--gold);
 }
-.limits-grid p {
+.deliverables-grid p {
   font-size: 12px;
   color: var(--text);
   margin-top: 8px;
@@ -923,18 +923,18 @@ footer > div {
   .code-panel pre {
     font-size: 9px;
   }
-  .limits {
+  .deliverables {
     padding: 30px 0 37px;
   }
-  .limits h2 {
+  .deliverables h2 {
     font-size: 28px;
   }
-  .limits-grid {
+  .deliverables-grid {
     grid-template-columns: 1fr;
     gap: 16px;
     margin-top: 23px;
   }
-  .limits-grid article {
+  .deliverables-grid article {
     padding-top: 12px;
   }
   footer {
